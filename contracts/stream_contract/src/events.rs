@@ -83,6 +83,7 @@ pub struct AdminTransferredEvent {
 }
 
 /// Emitted when a stream is paused.
+/// Emitted when a sender pauses an active stream.
 ///
 /// Topic: `("stream_paused", stream_id)`
 #[contracttype]
@@ -95,6 +96,10 @@ pub struct StreamPausedEvent {
 }
 
 /// Emitted when a stream is resumed after being paused.
+    pub paused_at: u64,
+}
+
+/// Emitted when a sender resumes a paused stream.
 ///
 /// Topic: `("stream_resumed", stream_id)`
 #[contracttype]
@@ -104,4 +109,16 @@ pub struct StreamResumedEvent {
     pub sender: Address,
     /// Ledger timestamp at which streaming resumed.
     pub resumed_at: u64,
+    pub new_end_time: u64,
+}
+
+/// Emitted when a stream is fully drained on the final withdrawal.
+///
+/// Topic: `("stream_completed", stream_id)`
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct StreamCompletedEvent {
+    pub stream_id: u64,
+    pub recipient: Address,
+    pub total_withdrawn: i128,
 }
