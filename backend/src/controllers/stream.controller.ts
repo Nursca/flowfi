@@ -56,34 +56,58 @@ function sumStringI128(values: string[]): string {
  * Create a new stream (stub for on-chain indexing)
  */
 export const createStream = async (req: Request, res: Response) => {
-  // This would typically involve validating the stream already exists on-chain
-  // or preparing metadata for the frontend to submit the transaction.
-  // For now, let's allow "registering" a stream if it doesn't exist.
   try {
     const { streamId, sender, recipient, tokenAddress, ratePerSecond, depositedAmount, startTime } = req.body;
 
+    const parsedStreamId = Number.parseInt(streamId, 10);
+    const parsedStartTime = Number.parseInt(startTime, 10);
+    const parsedRatePerSecond = BigInt(ratePerSecond);
+    const parsedDepositedAmount = BigInt(depositedAmount);
+
+    if (!Number.isFinite(parsedStreamId)) {
+      return res.status(400).json({ error: 'Invalid streamId: must be a valid integer' });
+    }
+
+    if (!Number.isFinite(parsedStartTime) || parsedStartTime < 0) {
+      return res.status(400).json({ error: 'Invalid startTime: must be a non-negative integer' });
+    }
+
+    if (parsedRatePerSecond <= 0n) {
+      return res.status(400).json({ error: 'Invalid ratePerSecond: must be greater than zero' });
+    }
+
+    if (parsedDepositedAmount <= 0n) {
+      return res.status(400).json({ error: 'Invalid depositedAmount: must be greater than zero' });
+    }
+
+    const endTime = parsedStartTime + Number(parsedDepositedAmount / parsedRatePerSecond);
+
     const stream = await prisma.stream.upsert({
-      where: { streamId: parseInt(streamId) },
+      where: { streamId: parsedStreamId },
       update: {
         isActive: true,
         lastUpdateTime: Math.floor(Date.now() / 1000)
       },
       create: {
-        streamId: parseInt(streamId),
+        streamId: parsedStreamId,
         sender,
         recipient,
         tokenAddress,
         ratePerSecond,
         depositedAmount,
         withdrawnAmount: "0",
-        startTime: parseInt(startTime),
-        endTime: parseInt(startTime) + Number(BigInt(depositedAmount) / BigInt(ratePerSecond)),
-        lastUpdateTime: parseInt(startTime)
+        startTime: parsedStartTime,
+        endTime,
+        lastUpdateTime: parsedStartTime
       }
     });
 
     return res.status(201).json(stream);
   } catch (error) {
+    if (error instanceof RangeError) {
+      logger.error('Range error in createStream:', error);
+      return res.status(400).json({ error: 'Invalid numeric values in request body' });
+    }
     logger.error('Error creating/upserting stream:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }

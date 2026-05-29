@@ -138,7 +138,7 @@ router.get('/:publicKey', getUser);
  *     tags:
  *       - Users
  *     summary: Fetch user activity history
- *     description: Returns a chronological history of all stream events associated with the user.
+ *     description: Returns a paginated chronological history of all stream events associated with the user.
  *     parameters:
  *       - in: path
  *         name: publicKey
@@ -146,15 +146,39 @@ router.get('/:publicKey', getUser);
  *         schema:
  *           type: string
  *         description: Stellar public key
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *           maximum: 200
+ *         description: Maximum number of events to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of events to skip for pagination
  *     responses:
  *       200:
- *         description: List of user events
+ *         description: Paginated list of user events
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/StreamEvent'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/StreamEvent'
+ *                 total:
+ *                   type: integer
+ *                 hasMore:
+ *                   type: boolean
+ *                 limit:
+ *                   type: integer
+ *                 offset:
+ *                   type: integer
  *       404:
  *         description: User not found
  */
