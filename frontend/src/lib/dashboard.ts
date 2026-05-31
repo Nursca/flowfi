@@ -1,4 +1,4 @@
-import type { BackendStream, BackendStreamEvent } from "./api-types";
+import type { BackendStream } from "./api-types";
 
 export interface ActivityItem {
   id: string;
@@ -41,8 +41,6 @@ export interface DashboardAnalyticsMetric {
   value: number | null;
   unavailableText: string;
 }
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/v1";
 
 const STROOPS_DIVISOR = 1e7;
 
@@ -192,22 +190,6 @@ export async function fetchDashboardData(publicKey: string): Promise<DashboardSn
     };
   } catch (error) {
     console.error("Dashboard data fetch error:", error);
-    throw error;
-  }
-}
-
-/**
- * Fetches activity history for a given public key.
- */
-export async function fetchUserEvents(publicKey: string): Promise<BackendStreamEvent[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/users/${publicKey}/events`);
-    if (!res.ok) {
-      throw new Error("Failed to fetch user events from backend.");
-    }
-    return await res.json();
-  } catch (error) {
-    console.error("User events fetch error:", error);
     throw error;
   }
 }
