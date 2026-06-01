@@ -6,7 +6,8 @@ import {
   toBaseUnits,
   toDurationSeconds,
   getTokenAddress,
-  toSorobanErrorMessage
+  toSorobanErrorMessage,
+  TOKEN_ADDRESSES
 } from "@/lib/soroban";
 import { hasValidPrecision, validateAmountInput } from "@/utils/amount";
 import { toast } from "react-hot-toast";
@@ -133,9 +134,11 @@ export default function CreateStreamPage() {
                 value={formData.token}
                 onChange={(e) => setFormData({ ...formData, token: e.target.value })}
               >
-                <option value="XLM">XLM</option>
-                <option value="USDC">USDC</option>
-                <option value="FLOW">FLOW</option>
+                {Object.keys(TOKEN_ADDRESSES).map((symbol) => (
+                  <option key={symbol} value={symbol}>
+                    {symbol}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="space-y-2">
