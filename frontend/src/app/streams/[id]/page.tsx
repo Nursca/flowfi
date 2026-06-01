@@ -19,7 +19,7 @@ import {
 } from "@/lib/soroban";
 import { CancelConfirmModal } from "@/components/stream-creation/CancelConfirmModal";
 import type { BackendStreamEvent } from "@/lib/api-types";
-import { formatAmount } from "@/utils/amount";
+import { formatAmount, streamProgressPercent } from "@/utils/amount";
 import { shortenPublicKey } from "@/lib/wallet";
 
 interface StreamDetail {
@@ -328,6 +328,7 @@ export default function StreamDetailsPage() {
   const deposited = BigInt(stream.depositedAmount);
   const withdrawn = BigInt(stream.withdrawnAmount);
   const ratePerSecond = BigInt(stream.ratePerSecond);
+  const progressPercent = streamProgressPercent(withdrawn, deposited);
 
   return (
     <main className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
@@ -399,7 +400,7 @@ export default function StreamDetailsPage() {
             <div
               className="h-full bg-gradient-to-r from-accent to-accent/70 transition-all duration-500"
               style={{
-                width: `${Math.min(100, Number((withdrawn * 100n) / deposited))}%`,
+                width: `${progressPercent}%`,
               }}
             />
           </div>
